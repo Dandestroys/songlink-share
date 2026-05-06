@@ -1,8 +1,10 @@
 # Songlink Share
 
-Share a song from Spotify, YouTube Music, Apple Music, Tidal — whatever. Tap **Songlink Share** in the Android share sheet and get a [song.link](https://song.link) URL on your clipboard instantly. No app-switching, no copying and pasting, no "wait which app do you use?"
-
+Share a song from Spotify, YouTube Music, Apple Music, Tidal — whatever. Tap **Songlink Share** in the Android share sheet and get a [song.link](https://song.link) URL on your clipboard instantly. No app-switching, no copying and pasting
 ---
+# why?
+
+i use https://odesli.co/ on a quite regular basis and was becoming increasingly frustrated with having to copy the link of the song I want to send, go to my browser open the site and paste it in.So in short I’m lazy lol 
 
 ## How it works
 
@@ -108,38 +110,6 @@ adb shell am start \
 ```
 
 This fires the same intent Spotify sends when you tap Share.
-
----
-
-## API
-
-The app hits one endpoint:
-
-```
-GET https://api.song.link/v1-alpha.1/links?url=<encoded-url>
-```
-
-Abbreviated response:
-
-```json
-{
-  "entityUniqueId": "SPOTIFY_SONG::6rqhFgbbKwnb9MLmUQDhG6",
-  "pageUrl": "https://song.link/s/6rqhFgbbKwnb9MLmUQDhG6",
-  "entitiesByUniqueId": {
-    "SPOTIFY_SONG::6rqhFgbbKwnb9MLmUQDhG6": {
-      "title": "Bohemian Rhapsody",
-      "artistName": "Queen"
-    }
-  },
-  "linksByPlatform": {
-    "spotify":      { "url": "https://open.spotify.com/track/6rqhFgbbKwnb9MLmUQDhG6" },
-    "youtubeMusic": { "url": "https://music.youtube.com/watch?v=fJ9rUzIMcZQ" },
-    "appleMusic":   { "url": "https://music.apple.com/us/album/bohemian-rhapsody/..." }
-  }
-}
-```
-
-The app reads `pageUrl` and copies it. If `pageUrl` is missing or empty, it shows an error — no guessing.
 
 ---
 
