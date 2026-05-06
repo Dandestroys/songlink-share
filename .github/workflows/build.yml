@@ -1,4 +1,4 @@
-name: meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow 
+name: meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow 
 
 on:
   push:
@@ -32,11 +32,11 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x gradlew
 
-      - name: Build APK
-        run: ./gradlew assemble --no-daemon
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --no-daemon
 
       - name: Rename APK
-        run: cp app/build/outputs/apk/release/app-release.apk songlink-share-latest.apk
+        run: cp app/build/outputs/apk/debug/app-debug.apk songlink-share-latest.apk
 
       - name: Publish to GitHub Releases
         if: github.event_name != 'pull_request'
@@ -55,5 +55,5 @@ jobs:
 
           ---
           Built from commit \`${{ github.sha }}\`" \
-            --release \
+            --prerelease \
             songlink-share-latest.apk
