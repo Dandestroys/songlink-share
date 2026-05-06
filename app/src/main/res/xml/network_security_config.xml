@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Network security config.
+    The Songlink API uses HTTPS, so no extra config is required for production.
+    This file exists to be explicit and allow cleartext for localhost if needed
+    during local development/debugging only.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

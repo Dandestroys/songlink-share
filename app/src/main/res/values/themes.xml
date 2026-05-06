@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme. The actual Material 3 theming is handled
+         entirely in Jetpack Compose via SonglinkShareTheme. This XML theme
+         only needs to exist so the system can render the splash screen and
+         window background before Compose draws its first frame. -->
+    <style name="Theme.SonglinkShare" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

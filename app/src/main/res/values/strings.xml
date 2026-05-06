@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Songlink Share</string>
+    <!-- Label shown in the Android share sheet when Songlink Share appears as a target -->
+    <string name="share_target_label">Songlink Share</string>
+</resources>
