@@ -7,7 +7,6 @@ on:
     branches: [ "main", "master" ]
   workflow_dispatch:
 
-# Allow the workflow to write to the repo (needed to create/update releases)
 permissions:
   contents: write
 
@@ -17,11 +16,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Check out the repository code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Set up JDK 17 (required by AGP 8.x)
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -29,46 +26,25 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      # 3. Generate the gradle-wrapper.jar using the pre-installed Gradle on
-      #    the runner so we don't have to commit a binary to the repo.
       - name: Generate Gradle wrapper
         run: gradle wrapper --gradle-version=8.9
-        working-directory: songlink-share
 
-      # 4. Make the wrapper script executable
       - name: Make gradlew executable
         run: chmod +x gradlew
-        working-directory: songlink-share
 
-      # 5. Build the debug APK
       - name: Build debug APK
         run: ./gradlew assembleDebug --no-daemon
-        working-directory: songlink-share
 
-      # 6. Rename the APK to something human-readable
       - name: Rename APK
-        run: |
-          cp songlink-share/app/build/outputs/apk/debug/app-debug.apk \
-             songlink-share-latest.apk
+        run: cp app/build/outputs/apk/debug/app-debug.apk songlink-share-latest.apk
 
-      # 7. Publish to GitHub Releases using the gh CLI (pre-installed on runners).
-      #    Deletes the existing "latest" release first so the file is always fresh.
-      #    Only runs on pushes to main/master — not on pull requests.
       - name: Publish to GitHub Releases
         if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Delete the old release AND its tag in one shot.
-          # --cleanup-tag removes the git tag at the same time, so we don't
-          # need a separate git push. Errors are ignored if it doesn't exist yet.
           gh release delete latest --yes --cleanup-tag 2>/dev/null || true
-
-          # Give GitHub's API a moment to finish the deletion before we
-          # recreate — avoids the HTTP 502 race condition.
           sleep 5
-
-          # Create a fresh release and upload the renamed APK
           gh release create latest \
             --title "Songlink Share — Latest Build" \
             --notes "### Install
