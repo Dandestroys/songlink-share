@@ -1,4 +1,4 @@
-name: meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow 
+name: meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow 
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build:
-    name: Build APKs
+    name: Build APK
     runs-on: ubuntu-latest
 
     steps:
@@ -22,8 +22,8 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: "17"
-          distribution: "temurin"
+          java-version: '17'
+          distribution: 'temurin'
           cache: gradle
 
       - name: Generate Gradle wrapper
@@ -32,16 +32,11 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x gradlew
 
-      - name: Build debug APK
-        run: ./gradlew assembleDebug --no-daemon
+      - name: Build APK
+        run: ./gradlew assemble --no-daemon
 
-      - name: Build release APK
-        run: ./gradlew assembleRelease --no-daemon
-
-      - name: Rename APKs
-        run: |
-          cp app/build/outputs/apk/debug/app-debug.apk songlink-share-debug-latest.apk
-          cp app/build/outputs/apk/release/app-release.apk songlink-share-release-latest.apk
+      - name: Rename APK
+        run: cp app/build/outputs/apk/release/app-release.apk songlink-share-latest.apk
 
       - name: Publish to GitHub Releases
         if: github.event_name != 'pull_request'
@@ -50,28 +45,15 @@ jobs:
         run: |
           gh release delete latest --yes --cleanup-tag 2>/dev/null || true
           sleep 5
-
           gh release create latest \
             --title "Songlink Share — Latest Build" \
-            --notes "### Downloads
-
-          - **Debug APK:** \`songlink-share-debug-latest.apk\`
-          - **Release APK:** \`songlink-share-release-latest.apk\`
-
-          ### Install
-
-          1. Download one of the APK files below.
-          2. Transfer it to your Android phone.
+            --notes "### Install
+          1. Download \`songlink-share-latest.apk\` below.
+          2. Transfer it to your Android phone (AirDrop, email, USB, etc.).
           3. Open the file on the phone — allow **Install from unknown sources** if prompted.
           4. Share any song from Spotify, YouTube Music, or Apple Music and pick **Songlink Share** from the share sheet.
-
-          ### Which one should I use?
-
-          - Use the **release APK** for normal testing or sharing.
-          - Use the **debug APK** if you need to debug
 
           ---
           Built from commit \`${{ github.sha }}\`" \
             --release \
-            songlink-share-debug-latest.apk \
-            songlink-share-release-latest.apk
+            songlink-share-latest.apk
