@@ -1,12 +1,6 @@
-# Keep data model classes used with kotlinx.serialization
+# Keep data model and history classes used with kotlinx.serialization
 -keep class com.songlink.share.model.** { *; }
-
-# Keep Retrofit interfaces
--keep interface com.songlink.share.api.** { *; }
-
-# OkHttp
--dontwarn okhttp3.**
--dontwarn okio.**
+-keep class com.songlink.share.HistoryRepository { *; }
 
 # kotlinx.serialization
 -keepattributes *Annotation*, InnerClasses

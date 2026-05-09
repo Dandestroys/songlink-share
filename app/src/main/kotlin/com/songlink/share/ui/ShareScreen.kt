@@ -10,6 +10,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +18,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -31,10 +34,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,24 +54,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.songlink.share.model.HistoryEntry
 import com.songlink.share.model.SonglinkState
 import com.songlink.share.ui.theme.SonglinkShareTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-/**
- * Root composable for the Songlink Share screen.
- *
- * Delegates to one of three sub-composables based on [state]:
- * - [IdleScreen]   — app opened standalone (no share intent)
- * - [LoadingScreen] — API call in flight
- * - [SuccessScreen] — pageUrl retrieved and copied to clipboard
- * - [ErrorScreen]  — any failure state
- */
 @Composable
 fun ShareScreen(
     state: SonglinkState,
+    history: List<HistoryEntry>,
     onCopyAgain: (String) -> Unit,
+    onCopyHistory: (String) -> Unit,
+    onClearHistory: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -81,7 +84,11 @@ fun ShareScreen(
             label = "state_transition"
         ) { currentState ->
             when (currentState) {
-                is SonglinkState.Idle -> IdleScreen()
+                is SonglinkState.Idle -> IdleScreen(
+                    history = history,
+                    onCopy = onCopyHistory,
+                    onClearHistory = onClearHistory
+                )
                 is SonglinkState.Loading -> LoadingScreen()
                 is SonglinkState.Success -> SuccessScreen(
                     pageUrl = currentState.pageUrl,
@@ -95,12 +102,21 @@ fun ShareScreen(
     }
 }
 
-// ---------------------------------------------------------------------------
-// Idle state — app opened from launcher, no share intent received
-// ---------------------------------------------------------------------------
+@Composable
+private fun IdleScreen(
+    history: List<HistoryEntry>,
+    onCopy: (String) -> Unit,
+    onClearHistory: () -> Unit
+) {
+    if (history.isEmpty()) {
+        EmptyIdleScreen()
+    } else {
+        HistoryScreen(history = history, onCopy = onCopy, onClearHistory = onClearHistory)
+    }
+}
 
 @Composable
-private fun IdleScreen() {
+private fun EmptyIdleScreen() {
     CenteredColumn {
         Icon(
             imageVector = Icons.Default.MusicNote,
@@ -128,17 +144,101 @@ private fun IdleScreen() {
     }
 }
 
-// ---------------------------------------------------------------------------
-// Loading state — waiting for the Songlink API response
-// ---------------------------------------------------------------------------
+@Composable
+private fun HistoryScreen(
+    history: List<HistoryEntry>,
+    onCopy: (String) -> Unit,
+    onClearHistory: () -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp)
+    ) {
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Recent songs",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                TextButton(onClick = onClearHistory) {
+                    Text("Clear all")
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+        }
+
+        items(history, key = { it.pageUrl + it.timestamp }) { entry ->
+            HistoryItem(entry = entry, onCopy = onCopy)
+            Spacer(Modifier.height(8.dp))
+        }
+
+        item {
+            Spacer(Modifier.height(8.dp))
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                AttributionText()
+            }
+        }
+    }
+}
+
+@Composable
+private fun HistoryItem(entry: HistoryEntry, onCopy: (String) -> Unit) {
+    var copied by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = entry.pageUrl,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = formatTimestamp(entry.timestamp),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+            }
+            IconButton(
+                onClick = {
+                    onCopy(entry.pageUrl)
+                    copied = true
+                    scope.launch {
+                        delay(1500)
+                        copied = false
+                    }
+                }
+            ) {
+                Icon(
+                    imageVector = if (copied) Icons.Default.CheckCircle else Icons.Default.ContentCopy,
+                    contentDescription = if (copied) "Copied" else "Copy",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+}
 
 @Composable
 private fun LoadingScreen() {
     CenteredColumn {
-        CircularProgressIndicator(
-            modifier = Modifier.size(56.dp),
-            strokeWidth = 4.dp
-        )
+        CircularProgressIndicator(modifier = Modifier.size(56.dp), strokeWidth = 4.dp)
         Spacer(Modifier.height(24.dp))
         Text(
             text = "Fetching Songlink…",
@@ -155,10 +255,6 @@ private fun LoadingScreen() {
     }
 }
 
-// ---------------------------------------------------------------------------
-// Success state — pageUrl retrieved and copied to clipboard
-// ---------------------------------------------------------------------------
-
 @Composable
 private fun SuccessScreen(
     pageUrl: String,
@@ -166,48 +262,35 @@ private fun SuccessScreen(
     onCopyAgain: () -> Unit,
     onOpenLink: () -> Unit
 ) {
-    // Tracks whether the "Copy again" button should show a brief checkmark
     var showCopied by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    CenteredColumn(
-        modifier = Modifier.padding(horizontal = 24.dp)
-    ) {
-        // Success icon
+    CenteredColumn(modifier = Modifier.padding(horizontal = 24.dp)) {
         Icon(
             imageVector = Icons.Default.CheckCircle,
             contentDescription = "Success",
             modifier = Modifier.size(64.dp),
             tint = MaterialTheme.colorScheme.primary
         )
-
         Spacer(Modifier.height(16.dp))
-
         Text(
             text = "Copied to clipboard!",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
-
         Spacer(Modifier.height(8.dp))
-
         Text(
             text = "Your Songlink smart-link is ready to paste anywhere.",
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-
         Spacer(Modifier.height(24.dp))
-
-        // URL display card
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
-            )
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
         ) {
             Row(
                 modifier = Modifier.padding(16.dp),
@@ -229,15 +312,8 @@ private fun SuccessScreen(
                 )
             }
         }
-
         Spacer(Modifier.height(24.dp))
-
-        // Action buttons — "Copy again" and "Open link"
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // "Copy again" — triggers a brief visual confirmation
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             FilledTonalButton(
                 onClick = {
                     onCopyAgain()
@@ -250,20 +326,14 @@ private fun SuccessScreen(
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
-                    imageVector = if (showCopied) Icons.Default.CheckCircle
-                                  else Icons.Default.ContentCopy,
+                    imageVector = if (showCopied) Icons.Default.CheckCircle else Icons.Default.ContentCopy,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(Modifier.size(8.dp))
                 Text(if (showCopied) "Copied!" else "Copy again")
             }
-
-            // "Open link" — opens the song.link page in the browser
-            Button(
-                onClick = onOpenLink,
-                modifier = Modifier.weight(1f)
-            ) {
+            Button(onClick = onOpenLink, modifier = Modifier.weight(1f)) {
                 Icon(
                     imageVector = Icons.Default.OpenInBrowser,
                     contentDescription = null,
@@ -273,21 +343,14 @@ private fun SuccessScreen(
                 Text("Open link")
             }
         }
-
         Spacer(Modifier.height(32.dp))
         AttributionText()
     }
 }
 
-// ---------------------------------------------------------------------------
-// Error state — something went wrong
-// ---------------------------------------------------------------------------
-
 @Composable
 private fun ErrorScreen(message: String) {
-    CenteredColumn(
-        modifier = Modifier.padding(horizontal = 24.dp)
-    ) {
+    CenteredColumn(modifier = Modifier.padding(horizontal = 24.dp)) {
         Icon(
             imageVector = Icons.Default.ErrorOutline,
             contentDescription = "Error",
@@ -305,20 +368,17 @@ private fun ErrorScreen(message: String) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.errorContainer
-            )
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
         ) {
             Text(
                 text = message,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onErrorContainer,
-                textAlign = TextAlign.Start,
                 modifier = Modifier.padding(16.dp)
             )
         }
         Spacer(Modifier.height(24.dp))
-        OutlinedButton(onClick = { /* handled by activity via intent retry */ }) {
+        OutlinedButton(onClick = {}) {
             Text("Try again by re-sharing the link")
         }
         Spacer(Modifier.height(32.dp))
@@ -326,11 +386,6 @@ private fun ErrorScreen(message: String) {
     }
 }
 
-// ---------------------------------------------------------------------------
-// Shared helpers
-// ---------------------------------------------------------------------------
-
-/** Attribution text displayed at the bottom of every screen. */
 @Composable
 private fun AttributionText() {
     Text(
@@ -341,48 +396,54 @@ private fun AttributionText() {
     )
 }
 
-/** A centered full-screen column layout reused across all state screens. */
 @Composable
-private fun CenteredColumn(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
+private fun CenteredColumn(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
+        modifier = Modifier.fillMaxSize().padding(24.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
             modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
-        ) {
-            content()
-        }
+        ) { content() }
     }
 }
 
-/** Opens [url] in the default browser. */
 private fun openUrl(context: Context, url: String) {
-    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-    context.startActivity(intent)
+    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
 }
 
-// ---------------------------------------------------------------------------
-// Previews
-// ---------------------------------------------------------------------------
+private fun formatTimestamp(timestamp: Long): String {
+    val diff = System.currentTimeMillis() - timestamp
+    return when {
+        diff < 60_000L -> "Just now"
+        diff < 3_600_000L -> "${diff / 60_000}m ago"
+        diff < 86_400_000L -> "${diff / 3_600_000}h ago"
+        else -> SimpleDateFormat("MMM d", Locale.getDefault()).format(Date(timestamp))
+    }
+}
 
-@Preview(showBackground = true, name = "Idle")
+@Preview(showBackground = true, name = "Idle - empty")
 @Composable
 private fun PreviewIdle() {
-    SonglinkShareTheme { ShareScreen(SonglinkState.Idle, onCopyAgain = {}) }
+    SonglinkShareTheme { ShareScreen(SonglinkState.Idle, emptyList(), {}, {}, {}) }
+}
+
+@Preview(showBackground = true, name = "Idle - with history")
+@Composable
+private fun PreviewIdleHistory() {
+    val history = listOf(
+        HistoryEntry("https://song.link/s/abc123", "https://open.spotify.com/track/abc123", System.currentTimeMillis() - 300_000),
+        HistoryEntry("https://song.link/s/def456", "https://music.apple.com/track/def456", System.currentTimeMillis() - 86_400_000)
+    )
+    SonglinkShareTheme { ShareScreen(SonglinkState.Idle, history, {}, {}, {}) }
 }
 
 @Preview(showBackground = true, name = "Loading")
 @Composable
 private fun PreviewLoading() {
-    SonglinkShareTheme { ShareScreen(SonglinkState.Loading, onCopyAgain = {}) }
+    SonglinkShareTheme { ShareScreen(SonglinkState.Loading, emptyList(), {}, {}, {}) }
 }
 
 @Preview(showBackground = true, name = "Success")
@@ -394,20 +455,10 @@ private fun PreviewSuccess() {
                 pageUrl = "https://song.link/s/6rqhFgbbKwnb9MLmUQDhG6",
                 originalUrl = "https://open.spotify.com/track/6rqhFgbbKwnb9MLmUQDhG6"
             ),
-            onCopyAgain = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Error")
-@Composable
-private fun PreviewError() {
-    SonglinkShareTheme {
-        ShareScreen(
-            state = SonglinkState.Error(
-                "The URL wasn't recognised by Songlink. Make sure you're sharing a supported music link."
-            ),
-            onCopyAgain = {}
+            history = emptyList(),
+            onCopyAgain = {},
+            onCopyHistory = {},
+            onClearHistory = {}
         )
     }
 }
