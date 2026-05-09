@@ -77,4 +77,4 @@ jobs:
           gh release create release songlink-share-latest.apk \
             --title "Songlink Share — Latest release" \
             --notes-file release-notes.md \
-            --prerelease
+            --release
