@@ -6,6 +6,8 @@ Share a song from Spotify, YouTube Music, Apple Music, Tidal — whatever. Tap *
 
 i use https://odesli.co/ on a quite regular basis and was becoming increasingly frustrated with having to copy the link of the song I want to send, go to my browser open the site and paste it in.So in short I’m lazy lol 
 
+---
+
 ## How it works
 
 1. Hit share on any song in any music app.
@@ -13,6 +15,14 @@ i use https://odesli.co/ on a quite regular basis and was becoming increasingly 
 3. Done. The universal link is already on your clipboard.
 
 Under the hood it calls the [Odesli API](https://www.notion.so/API-d0ebe08a5e304a55928405eb682f6741) with your URL and grabs the `pageUrl` from the response. That's the one link that works for everyone regardless of what they're listening on.
+
+---
+
+## ai usage
+
+it has been used to fix bugs as i am stupid.
+it has also been used to orginize the code.
+this readme was mostly ai as im lazy lmao
 
 ---
 
