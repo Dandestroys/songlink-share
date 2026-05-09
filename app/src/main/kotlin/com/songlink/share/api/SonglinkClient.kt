@@ -5,7 +5,7 @@ import com.songlink.share.BuildConfig
 import com.songlink.share.model.SonglinkResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
+import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
@@ -15,12 +15,6 @@ class ApiException(val code: Int) : Exception("HTTP $code")
 object SonglinkClient {
 
     private const val ENDPOINT = "https://api.song.link/v1-alpha.1/links"
-
-    private val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-        coerceInputValues = true
-    }
 
     suspend fun getLinks(url: String): SonglinkResponse = withContext(Dispatchers.IO) {
         val encoded = URLEncoder.encode(url, "UTF-8")
@@ -35,7 +29,8 @@ object SonglinkClient {
             if (code != HttpURLConnection.HTTP_OK) throw ApiException(code)
 
             val body = connection.inputStream.bufferedReader().readText()
-            json.decodeFromString<SonglinkResponse>(body)
+            val json = JSONObject(body)
+            SonglinkResponse(pageUrl = json.optString("pageUrl").ifEmpty { null })
         } finally {
             connection.disconnect()
         }

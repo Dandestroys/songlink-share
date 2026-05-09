@@ -2,26 +2,43 @@ package com.songlink.share
 
 import android.content.Context
 import com.songlink.share.model.HistoryEntry
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import org.json.JSONArray
+import org.json.JSONObject
 
 internal object HistoryRepository {
 
     private const val PREFS = "songlink_history"
     private const val KEY = "entries"
     private const val MAX = 20
-    private val json = Json { ignoreUnknownKeys = true }
 
     fun load(context: Context): List<HistoryEntry> {
         val raw = prefs(context).getString(KEY, null) ?: return emptyList()
-        return try { json.decodeFromString(raw) } catch (e: Exception) { emptyList() }
+        return try {
+            val arr = JSONArray(raw)
+            List(arr.length()) { i ->
+                val obj = arr.getJSONObject(i)
+                HistoryEntry(
+                    pageUrl = obj.getString("pageUrl"),
+                    originalUrl = obj.getString("originalUrl"),
+                    timestamp = obj.getLong("timestamp")
+                )
+            }
+        } catch (e: Exception) { emptyList() }
     }
 
     fun add(context: Context, entry: HistoryEntry) {
         val list = load(context).toMutableList()
         list.removeAll { it.pageUrl == entry.pageUrl }
         list.add(0, entry)
-        prefs(context).edit().putString(KEY, json.encodeToString(list.take(MAX))).apply()
+        val arr = JSONArray()
+        list.take(MAX).forEach { e ->
+            arr.put(JSONObject().apply {
+                put("pageUrl", e.pageUrl)
+                put("originalUrl", e.originalUrl)
+                put("timestamp", e.timestamp)
+            })
+        }
+        prefs(context).edit().putString(KEY, arr.toString()).apply()
     }
 
     fun clear(context: Context) {

@@ -21,13 +21,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -49,11 +42,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.songlink.share.R
 import com.songlink.share.model.HistoryEntry
 import com.songlink.share.model.SonglinkState
 import com.songlink.share.ui.theme.SonglinkShareTheme
@@ -119,7 +114,7 @@ private fun IdleScreen(
 private fun EmptyIdleScreen() {
     CenteredColumn {
         Icon(
-            imageVector = Icons.Default.MusicNote,
+            painter = painterResource(R.drawable.ic_music_note),
             contentDescription = null,
             modifier = Modifier.size(72.dp),
             tint = MaterialTheme.colorScheme.primary
@@ -165,9 +160,7 @@ private fun HistoryScreen(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
-                TextButton(onClick = onClearHistory) {
-                    Text("Clear all")
-                }
+                TextButton(onClick = onClearHistory) { Text("Clear all") }
             }
             Spacer(Modifier.height(8.dp))
         }
@@ -215,18 +208,15 @@ private fun HistoryItem(entry: HistoryEntry, onCopy: (String) -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                 )
             }
-            IconButton(
-                onClick = {
-                    onCopy(entry.pageUrl)
-                    copied = true
-                    scope.launch {
-                        delay(1500)
-                        copied = false
-                    }
-                }
-            ) {
+            IconButton(onClick = {
+                onCopy(entry.pageUrl)
+                copied = true
+                scope.launch { delay(1500); copied = false }
+            }) {
                 Icon(
-                    imageVector = if (copied) Icons.Default.CheckCircle else Icons.Default.ContentCopy,
+                    painter = painterResource(
+                        if (copied) R.drawable.ic_check_circle else R.drawable.ic_content_copy
+                    ),
                     contentDescription = if (copied) "Copied" else "Copy",
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -267,7 +257,7 @@ private fun SuccessScreen(
 
     CenteredColumn(modifier = Modifier.padding(horizontal = 24.dp)) {
         Icon(
-            imageVector = Icons.Default.CheckCircle,
+            painter = painterResource(R.drawable.ic_check_circle),
             contentDescription = "Success",
             modifier = Modifier.size(64.dp),
             tint = MaterialTheme.colorScheme.primary
@@ -298,7 +288,7 @@ private fun SuccessScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Link,
+                    painter = painterResource(R.drawable.ic_link),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -318,15 +308,14 @@ private fun SuccessScreen(
                 onClick = {
                     onCopyAgain()
                     showCopied = true
-                    scope.launch {
-                        delay(1500)
-                        showCopied = false
-                    }
+                    scope.launch { delay(1500); showCopied = false }
                 },
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
-                    imageVector = if (showCopied) Icons.Default.CheckCircle else Icons.Default.ContentCopy,
+                    painter = painterResource(
+                        if (showCopied) R.drawable.ic_check_circle else R.drawable.ic_content_copy
+                    ),
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )
@@ -335,7 +324,7 @@ private fun SuccessScreen(
             }
             Button(onClick = onOpenLink, modifier = Modifier.weight(1f)) {
                 Icon(
-                    imageVector = Icons.Default.OpenInBrowser,
+                    painter = painterResource(R.drawable.ic_open_in_browser),
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )
@@ -352,7 +341,7 @@ private fun SuccessScreen(
 private fun ErrorScreen(message: String) {
     CenteredColumn(modifier = Modifier.padding(horizontal = 24.dp)) {
         Icon(
-            imageVector = Icons.Default.ErrorOutline,
+            painter = painterResource(R.drawable.ic_error_outline),
             contentDescription = "Error",
             modifier = Modifier.size(64.dp),
             tint = MaterialTheme.colorScheme.error
