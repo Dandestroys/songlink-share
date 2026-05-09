@@ -1,10 +1,10 @@
-name: meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow meow 
+name: debug
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "debug"]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [ "debug" ]
   workflow_dispatch:
 
 permissions:
@@ -43,9 +43,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release delete latest --yes --cleanup-tag 2>/dev/null || true
+          gh release delete debug --yes --cleanup-tag 2>/dev/null || true
           sleep 5
-          gh release create latest \
+          gh release create debug \
             --title "Songlink Share — Latest Build" \
             --notes "### Install
           1. Download \`songlink-share-latest.apk\` below.
