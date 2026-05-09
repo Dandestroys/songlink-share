@@ -23,6 +23,7 @@ Under the hood it calls the [Odesli API](https://www.notion.so/API-d0ebe08a5e304
 it has been used to fix bugs as i am stupid.
 it has also been used to orginize the code.
 this readme was mostly ai as im lazy lmao
+it has also been used to push changes as i dont know how git works fully and its constantly giving me errors:P
 
 ---
 
