@@ -14,7 +14,6 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-        ndk { abiFilters += "arm64-v8a" }
         resourceConfigurations += "en"
 
     }
@@ -61,6 +60,11 @@ android {
             excludes += "kotlin-tooling-metadata.json"
             excludes += "kotlin/**"
             excludes += "META-INF/versions/**"
+        }
+        jniLibs {
+            excludes += "**/x86/**"
+            excludes += "**/x86_64/**"
+            excludes += "**/armeabi-v7a/**"
         }
     }
 }
