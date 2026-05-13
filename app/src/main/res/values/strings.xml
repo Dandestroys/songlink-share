@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Songlink Share</string>
-    <!-- Label shown in the Android share sheet when Songlink Share appears as a target -->
     <string name="share_target_label">Songlink Share</string>
+    <string name="empty_description">Share a song from Spotify, YouTube Music, Apple Music, or any other music app, then choose Songlink Share.</string>
+    <string name="attribution">Powered by Songlink</string>
+    <string name="loading_title">Fetching Songlink…</string>
+    <string name="loading_subtitle">Resolving across all music platforms</string>
+    <string name="copied_title">Copied to clipboard!</string>
+    <string name="copied_subtitle">Your Songlink smart-link is ready to paste anywhere.</string>
+    <string name="copy_again">Copy again</string>
+    <string name="copied">Copied!</string>
+    <string name="open_link">Open link</string>
+    <string name="error_title">Something went wrong</string>
+    <string name="error_retry">Try again by re-sharing the link</string>
+    <string name="history_header">Recent songs</string>
+    <string name="clear_all">Clear all</string>
+    <string name="copy">Copy</string>
+    <string name="success_icon_desc">Success</string>
+    <string name="error_icon_desc">Error</string>
 </resources>

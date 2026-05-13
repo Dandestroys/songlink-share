@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="24dp">
+
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:src="@drawable/ic_check_circle"
+            android:tint="@color/primary"
+            android:contentDescription="@string/success_icon_desc" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/copied_title"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/on_surface"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/copied_subtitle"
+            android:textSize="14sp"
+            android:textColor="@color/on_surface_variant"
+            android:gravity="center" />
+
+        <!-- Link card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/bg_card"
+            android:clipToOutline="true"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="16dp"
+            android:minHeight="52dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_link"
+                android:tint="@color/primary"
+                android:contentDescription="@null" />
+
+            <TextView
+                android:id="@+id/tv_link_url"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:textSize="14sp"
+                android:textColor="@color/on_surface_variant"
+                android:maxLines="2"
+                android:ellipsize="end" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_copy_again"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/bg_button_filled"
+                android:text="@string/copy_again"
+                android:textColor="@color/on_primary"
+                android:textAllCaps="false"
+                android:textSize="14sp"
+                android:drawableStart="@drawable/ic_content_copy"
+                android:drawableTint="@color/on_primary"
+                android:drawablePadding="6dp"
+                android:paddingHorizontal="16dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp" />
+
+            <Button
+                android:id="@+id/btn_open_link"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_button_tonal"
+                android:text="@string/open_link"
+                android:textColor="@color/on_secondary_container"
+                android:textAllCaps="false"
+                android:textSize="14sp"
+                android:drawableStart="@drawable/ic_open_in_browser"
+                android:drawableTint="@color/on_secondary_container"
+                android:drawablePadding="6dp"
+                android:paddingHorizontal="16dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp" />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="@string/attribution"
+            android:textSize="11sp"
+            android:textColor="@color/on_surface_variant_dim"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+</ScrollView>

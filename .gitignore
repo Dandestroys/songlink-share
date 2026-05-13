@@ -1,11 +1,28 @@
+# Build outputs
+/build/
+app/build/
+
+# Gradle caches (NOT gradle-wrapper.jar or gradle-wrapper.properties — both must be committed)
+.gradle/
+
+# IDE — all .idea/ directories at any depth
+**/.idea/
+
+# Android Studio module files
 *.iml
-.gradle
-/local.properties
-/.idea
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+
+# Local config (contains SDK path, never commit)
 local.properties
-/.claude
+
+# macOS
+.DS_Store
+
+# Native build outputs
+.externalNativeBuild/
+.cxx/
+
+# Profiling captures
+captures/
+
+# Claude Code project memory
+.claude/

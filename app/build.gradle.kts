@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -14,15 +13,19 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+        resourceConfigurations += "en"
 
     }
 
     signingConfigs {
         create("release") {
-            storeFile = file(System.getenv("KEYSTORE_FILE") ?: "dummy.keystore")
-            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "password"
-            keyAlias = System.getenv("KEY_ALIAS") ?: "key0"
-            keyPassword = System.getenv("KEY_PASSWORD") ?: "password"
+            val keystorePath = System.getenv("KEYSTORE_FILE")
+            if (keystorePath != null) {
+                storeFile = file(keystorePath)
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            }
         }
     }
 
@@ -34,7 +37,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = if (System.getenv("KEYSTORE_FILE") != null) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 
@@ -43,12 +50,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     buildFeatures {
-        compose = true
+        viewBinding = true
         buildConfig = true
     }
 
@@ -59,20 +62,38 @@ android {
             excludes += "kotlin-tooling-metadata.json"
             excludes += "kotlin/**"
             excludes += "META-INF/versions/**"
+            excludes += "META-INF/*.kotlin_module"
+            excludes += "META-INF/*.version"
+            excludes += "META-INF/services/**"
+            excludes += "META-INF/proguard/**"
+            excludes += "META-INF/version-control-info.textproto"
+            excludes += "**/*.kotlin_builtins"
+            excludes += "**/*.kotlin_metadata"
+            excludes += "META-INF/com.android.tools/**"
         }
+        jniLibs {
+            excludes += "**/x86/**"
+            excludes += "**/x86_64/**"
+            excludes += "**/armeabi-v7a/**"
+        }
+    }
+
+}
+
+if (tasks.findByName("prepareKotlinBuildScriptModel") == null) {
+    tasks.register("prepareKotlinBuildScriptModel")
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.activity.compose)
-
-    // Compose BOM — pins all Compose library versions together
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    debugImplementation(libs.androidx.ui.tooling)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.activity.ktx)
+    implementation(libs.androidx.recyclerview)
 }
