@@ -97,3 +97,10 @@ dependencies {
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.recyclerview)
 }
+
+// profileinstaller is a dev tool for benchmarking that comes in transitively.
+// Its compiled baseline.prof references pre-R8 method names that no longer exist
+// after minification, which can cause ART dexopt to fail during installation.
+configurations.configureEach {
+    exclude(group = "androidx.profileinstaller")
+}
