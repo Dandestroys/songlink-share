@@ -27,9 +27,24 @@ android {
                 keyPassword = System.getenv("KEY_PASSWORD")
             }
         }
+        create("debugCI") {
+            val keystorePath = System.getenv("DEBUG_KEYSTORE_FILE")
+            if (keystorePath != null) {
+                storeFile = file(keystorePath)
+                storePassword = System.getenv("DEBUG_STORE_PASSWORD")
+                keyAlias = System.getenv("DEBUG_KEY_ALIAS")
+                keyPassword = System.getenv("DEBUG_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
+        debug {
+            signingConfig = if (System.getenv("DEBUG_KEYSTORE_FILE") != null)
+                signingConfigs.getByName("debugCI")
+            else
+                signingConfigs.getByName("debug")
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true

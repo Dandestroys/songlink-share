@@ -32,7 +32,15 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x gradlew
 
+      - name: Decode debug keystore
+        run: echo "${{ secrets.DEBUG_KEYSTORE_BASE64 }}" | base64 --decode > $GITHUB_WORKSPACE/app/debug-ci.keystore
+
       - name: Build debug APK
+        env:
+          DEBUG_KEYSTORE_FILE: ${{ github.workspace }}/app/debug-ci.keystore
+          DEBUG_STORE_PASSWORD: ${{ secrets.DEBUG_STORE_PASSWORD }}
+          DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
+          DEBUG_KEY_PASSWORD: ${{ secrets.DEBUG_KEY_PASSWORD }}
         run: ./gradlew assembleDebug --no-daemon
 
       - name: Rename APK
