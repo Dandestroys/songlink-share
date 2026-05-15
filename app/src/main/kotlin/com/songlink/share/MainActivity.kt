@@ -7,7 +7,9 @@ import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
+import android.view.animation.OvershootInterpolator
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
@@ -59,15 +61,26 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun render(state: SonglinkState, history: List<HistoryEntry>) {
-        val view = when (state) {
+        val newView = when (state) {
             is SonglinkState.Idle    -> if (history.isEmpty()) emptyView() else historyView(history)
             is SonglinkState.Loading -> loadingView()
             is SonglinkState.Success -> successView(state)
             is SonglinkState.Error   -> errorView(state.message)
         }
-        if (binding.contentFrame.getChildAt(0) !== view) {
-            binding.contentFrame.removeAllViews()
-            binding.contentFrame.addView(view)
+        val current = binding.contentFrame.getChildAt(0)
+        if (current === newView) return
+        if (current != null) {
+            current.animate().cancel()
+            current.animate().alpha(0f).setDuration(120).withEndAction {
+                binding.contentFrame.removeAllViews()
+                newView.alpha = 0f
+                binding.contentFrame.addView(newView)
+                newView.animate().alpha(1f).setDuration(160).start()
+            }.start()
+        } else {
+            newView.alpha = 0f
+            binding.contentFrame.addView(newView)
+            newView.animate().alpha(1f).setDuration(200).start()
         }
     }
 
@@ -101,10 +114,24 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun successView(state: SonglinkState.Success): View {
+        val isNew = successView == null
         if (successView == null)
             successView = inflater.inflate(R.layout.view_success, binding.contentFrame, false)
         val view = successView!!
         view.findViewById<TextView>(R.id.tv_link_url).text = state.pageUrl
+
+        if (isNew) {
+            val icon = view.findViewById<ImageView>(R.id.iv_success_icon)
+            icon.scaleX = 0f
+            icon.scaleY = 0f
+            icon.alpha = 0f
+            icon.animate()
+                .scaleX(1f).scaleY(1f).alpha(1f)
+                .setDuration(450)
+                .setInterpolator(OvershootInterpolator(2f))
+                .setStartDelay(180)
+                .start()
+        }
 
         val btnCopy = view.findViewById<Button>(R.id.btn_copy_again)
         val handler = Handler(Looper.getMainLooper())
