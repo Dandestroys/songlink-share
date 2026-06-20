@@ -1,4 +1,3 @@
--keep class com.songlink.share.model.** { *; }
 -allowaccessmodification
 
 # Strip all Android logging in release

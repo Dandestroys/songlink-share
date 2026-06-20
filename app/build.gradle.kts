@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
 }
 
 android {
@@ -51,7 +50,7 @@ android {
     }
 
     buildFeatures {
-        viewBinding = true
+        viewBinding = false
         buildConfig = true
     }
 
@@ -80,27 +79,7 @@ android {
 
 }
 
-if (tasks.findByName("prepareKotlinBuildScriptModel") == null) {
-    tasks.register("prepareKotlinBuildScriptModel")
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-    }
-}
-
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.activity.ktx)
-    implementation(libs.androidx.recyclerview)
+    // Pure Java, no external dependencies!
 }
 
-// profileinstaller is a dev tool for benchmarking that comes in transitively.
-// Its compiled baseline.prof references pre-R8 method names that no longer exist
-// after minification, which can cause ART dexopt to fail during installation.
-configurations.configureEach {
-    exclude(group = "androidx.profileinstaller")
-}
