@@ -13,7 +13,9 @@ android {
         versionCode = 1
         versionName = "1.0"
         resourceConfigurations += "en"
-
+        ndk {
+            abiFilters.add("arm64-v8a")
+        }
     }
 
     signingConfigs {
@@ -41,6 +43,15 @@ android {
             } else {
                 signingConfigs.getByName("debug")
             }
+        }
+        debug {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
