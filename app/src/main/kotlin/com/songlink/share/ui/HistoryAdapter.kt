@@ -21,8 +21,13 @@ class HistoryAdapter(
     private var items: List<HistoryEntry> = emptyList()
 
     fun submitList(list: List<HistoryEntry>) {
+        val oldSize = items.size
         items = list
-        notifyDataSetChanged()
+        when {
+            list.isEmpty() -> notifyDataSetChanged()
+            list.size > oldSize -> notifyItemRangeInserted(0, list.size - oldSize)
+            else -> notifyDataSetChanged()
+        }
     }
 
     override fun getItemCount() = items.size + 1
